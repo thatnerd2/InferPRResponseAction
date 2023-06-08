@@ -1,29 +1,31 @@
-import {wait} from '../src/wait'
-import * as process from 'process'
-import * as cp from 'child_process'
-import * as path from 'path'
 import {expect, test} from '@jest/globals'
+import {
+  createCommentIfFromCopilotDefender,
+  getChatGPTResponse
+} from '../src/create-comment'
 
-test('throws invalid number', async () => {
-  const input = parseInt('foo', 10)
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number')
-})
+require('dotenv').config()
 
-test('wait 500 ms', async () => {
-  const start = new Date()
-  await wait(500)
-  const end = new Date()
-  var delta = Math.abs(end.getTime() - start.getTime())
-  expect(delta).toBeGreaterThan(450)
-})
+// test('replies to only copilot defender', async () => {
+//   expect(1).toBe(1)
+//   const commentId = '1223278803'
+//   expect(commentId).not.toBeUndefined()
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-  process.env['INPUT_MILLISECONDS'] = '500'
-  const np = process.execPath
-  const ip = path.join(__dirname, '..', 'lib', 'main.js')
-  const options: cp.ExecFileSyncOptions = {
-    env: process.env
-  }
-  console.log(cp.execFileSync(np, [ip], options).toString())
+//   await createCommentIfFromCopilotDefender(parseInt(commentId))
+// })
+
+test('get chatgpt response', async () => {
+  const promptMessages = [
+    {
+      role: 'system',
+      content: "Follow the user's instructions"
+    },
+    {
+      role: 'user',
+      content: 'I say 1, you say 2. Ready?\n\n1!'
+    }
+  ]
+  const response = await getChatGPTResponse(promptMessages)
+  expect(response).not.toBeUndefined()
+  expect(response).toBe('2!')
 })

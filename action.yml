@@ -1,11 +1,12 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Infer# PR Comment Response'
+
 inputs:
-  milliseconds: # change this
+  comment_id:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'ID of the comment to respond to'
+  github_token:
+    required: true
+    description: 'GitHub token for PR comments'
 runs:
   using: 'node16'
   main: 'dist/index.js'
