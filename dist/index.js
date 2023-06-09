@@ -115,8 +115,7 @@ function createCommentIfFromCopilotDefender(commentId) {
             return false;
         }
         // Retrieve the suggestion
-        const copilotDefenderCommentWithSuggestion = commentThread.find(comment => comment.user.login === 'copilot-defender' &&
-            comment.body.includes('```suggestion'));
+        const copilotDefenderCommentWithSuggestion = commentThread.find(comment => comment.user.login === 'copilot-defender');
         if (!copilotDefenderCommentWithSuggestion) {
             console.log('No suggestion found, exiting');
             return false;

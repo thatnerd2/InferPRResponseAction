@@ -135,9 +135,7 @@ export async function createCommentIfFromCopilotDefender(
 
   // Retrieve the suggestion
   const copilotDefenderCommentWithSuggestion = commentThread.find(
-    comment =>
-      comment.user.login === 'copilot-defender' &&
-      comment.body.includes('```suggestion')
+    comment => comment.user.login === 'copilot-defender'
   )
 
   if (!copilotDefenderCommentWithSuggestion) {
