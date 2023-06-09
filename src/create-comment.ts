@@ -159,7 +159,7 @@ export async function createCommentIfFromCopilotDefender(
     : file_contents[endLine - 1]
 
   const previousCommentMsgs = commentThread.map((comment, i) => ({
-    role: i % 2 === 0 ? 'user' : 'assistant',
+    role: i % 2 === 0 ? 'assistant' : 'user',
     content: comment.body
   }))
   console.log('beforeCode', beforeCode)
