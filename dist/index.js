@@ -97,9 +97,9 @@ function createCommentIfFromCopilotDefender(commentId) {
         });
         console.log(comments);
         const commentThread = yield getCopilotDefenderCommentThread(comments, commentId);
-        console.log('Comment thread:');
-        console.log(commentThread);
-        if (commentThread.length === 0) {
+        console.log('Comment Maybe done by Copilot defender:');
+        console.log(commentThread[commentThread.length - 2]);
+        if (commentThread.length < 2) {
             console.log('No comment thread found, exiting');
             return false;
         }
