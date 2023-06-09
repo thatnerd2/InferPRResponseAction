@@ -58,7 +58,20 @@ async function getCopilotDefenderCommentThread(
 
   const commentThread = []
   let lastComment = commentMap[commentId]
-  // TODO what if lastcomment isn't really the last comment? we'd need to check
+  // Check if last comment is by copilot defender. if so, ignore it
+  if (lastComment.user.login === 'copilot-defender') {
+    return []
+  }
+
+  // Check if lastcomment isn't really the last comment (i.e. it has a reply)
+  if (
+    Object.values(commentMap).some(
+      comment => comment.in_reply_to_id === commentId
+    )
+  ) {
+    return []
+  }
+
   while (lastComment) {
     commentThread.push(lastComment)
     if (!lastComment.in_reply_to_id) break
