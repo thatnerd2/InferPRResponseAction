@@ -74,14 +74,14 @@ function createCommentIfFromCopilotDefender(commentId) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!process.env.GITHUB_REPOSITORY ||
             !process.env.GITHUB_EVENT_PATH ||
-            !process.env.GITHUB_TOKEN ||
+            !process.env.CPD_GITHUB_TOKEN ||
             !process.env.OPENAI_API_KEY ||
             !process.env.OPENAI_BASE_URL ||
             !process.env.OPENAI_DEPLOYMENT_NAME) {
-            console.log('GITHUB_REPOSITORY, GITHUB_EVENT_PATH, GITHUB_TOKEN, OPENAI_API_KEY, OPENAI_BASE_URL, or OPENAI_DEPLOYMENT_NAME not set');
+            console.log('GITHUB_REPOSITORY, GITHUB_EVENT_PATH, CPD_GITHUB_TOKEN, OPENAI_API_KEY, OPENAI_BASE_URL, or OPENAI_DEPLOYMENT_NAME not set');
             return false;
         }
-        const octokit = new rest_1.Octokit({ auth: process.env.GITHUB_TOKEN });
+        const octokit = new rest_1.Octokit({ auth: process.env.CPD_GITHUB_TOKEN });
         const owner = process.env.GITHUB_REPOSITORY.split('/')[0];
         const repo = process.env.GITHUB_REPOSITORY.split('/')[1];
         const event = JSON.parse(fs_1.default.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
@@ -95,7 +95,10 @@ function createCommentIfFromCopilotDefender(commentId) {
             repo,
             pull_number: pullNumber
         });
+        console.log(comments);
         const commentThread = yield getCopilotDefenderCommentThread(comments, commentId);
+        console.log('Comment thread:');
+        console.log(commentThread);
         if (commentThread.length === 0) {
             console.log('No comment thread found, exiting');
             return false;
