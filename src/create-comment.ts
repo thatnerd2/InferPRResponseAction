@@ -100,7 +100,6 @@ export async function createCommentIfFromCopilotDefender(
     repo,
     pull_number: pullNumber
   })
-  console.log(comments)
 
   const commentThread = await getCopilotDefenderCommentThread(
     comments,
@@ -154,6 +153,8 @@ export async function createCommentIfFromCopilotDefender(
   ]
 
   const body = await getChatGPTResponse(prompt)
+  console.log('CHATGPT RESPONSE')
+  console.log(body)
   await octokit.rest.issues.createComment({
     owner,
     repo,
@@ -161,5 +162,6 @@ export async function createCommentIfFromCopilotDefender(
     issue_number: pullNumber,
     in_reply_to: commentId
   })
+  console.log('RETURN TRUE')
   return true
 }

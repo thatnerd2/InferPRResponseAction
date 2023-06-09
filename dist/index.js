@@ -95,7 +95,6 @@ function createCommentIfFromCopilotDefender(commentId) {
             repo,
             pull_number: pullNumber
         });
-        console.log(comments);
         const commentThread = yield getCopilotDefenderCommentThread(comments, commentId);
         console.log('Comment Maybe done by Copilot defender:');
         console.log(commentThread[commentThread.length - 2]);
@@ -135,6 +134,8 @@ function createCommentIfFromCopilotDefender(commentId) {
             { role: 'user', content: userQuery }
         ];
         const body = yield getChatGPTResponse(prompt);
+        console.log('CHATGPT RESPONSE');
+        console.log(body);
         yield octokit.rest.issues.createComment({
             owner,
             repo,
@@ -142,6 +143,7 @@ function createCommentIfFromCopilotDefender(commentId) {
             issue_number: pullNumber,
             in_reply_to: commentId
         });
+        console.log('RETURN TRUE');
         return true;
     });
 }
