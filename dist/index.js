@@ -121,27 +121,35 @@ function createCommentIfFromCopilotDefender(commentId) {
             console.log('No suggestion found, exiting');
             return false;
         }
-        const beforeCode = 'print("Hello, world!")';
-        const fixAndExplanation = copilotDefenderCommentWithSuggestion.body;
-        const userQuery = commentThread[commentThread.length - 1].body;
+        const diffHunk = copilotDefenderCommentWithSuggestion.diff_hunk;
+        const startLine = copilotDefenderCommentWithSuggestion.start_line;
+        const endLine = copilotDefenderCommentWithSuggestion.line;
+        const file_contents = diffHunk.split('\n').slice(1); // To eliminate the @@ line
+        if (!endLine) {
+            console.log('No end line found, exiting');
+            return false;
+        }
+        const beforeCode = startLine
+            ? file_contents.slice(startLine - 1, endLine).join('\n')
+            : file_contents[endLine - 1];
+        const previousCommentMsgs = commentThread.map((comment, i) => ({
+            role: i % 2 === 0 ? 'user' : 'assistant',
+            content: comment.body
+        }));
         console.log('beforeCode', beforeCode);
-        console.log('fixAndExplanation', fixAndExplanation);
-        const prompt = [
+        const promptMessages = [
             {
                 role: 'system',
                 content: 'You are a helpful programming assistant who is conducting a code review. You suggest fixes to problems in the code and give helpful explanations. You reply to feedback or questions from developers in a polite and constructive way.'
             },
             {
                 role: 'user',
-                content: `How can I improve this code?\n\n\`\`\`\n${beforeCode}\n\`\`\``
-            },
-            {
-                role: 'assistant',
-                content: fixAndExplanation
-            },
-            { role: 'user', content: userQuery }
-        ];
-        const body = yield getChatGPTResponse(prompt);
+                content: `Given the context of the files above, how can I improve this block of code?\n\n\`\`\`\n${beforeCode}\n\`\`\``
+            }
+        ].concat(previousCommentMsgs);
+        console.log('PROMPT MESSAGES');
+        console.log(promptMessages);
+        const body = yield getChatGPTResponse(promptMessages);
         console.log('CHATGPT RESPONSE');
         console.log(body);
         yield octokit.rest.pulls.createReplyForReviewComment({

@@ -7,6 +7,8 @@ type Comment = {
   body: string
   in_reply_to_id?: number
   diff_hunk: string
+  start_line?: number | null
+  line?: number
   path: string
   user: {login: string}
 }
@@ -143,13 +145,26 @@ export async function createCommentIfFromCopilotDefender(
     return false
   }
 
-  const beforeCode = 'print("Hello, world!")'
-  const fixAndExplanation = copilotDefenderCommentWithSuggestion.body
-  const userQuery = commentThread[commentThread.length - 1].body
-  console.log('beforeCode', beforeCode)
-  console.log('fixAndExplanation', fixAndExplanation)
+  const diffHunk = copilotDefenderCommentWithSuggestion.diff_hunk
+  const startLine = copilotDefenderCommentWithSuggestion.start_line
+  const endLine = copilotDefenderCommentWithSuggestion.line
+  const file_contents = diffHunk.split('\n').slice(1) // To eliminate the @@ line
+  if (!endLine) {
+    console.log('No end line found, exiting')
+    return false
+  }
 
-  const prompt = [
+  const beforeCode = startLine
+    ? file_contents.slice(startLine - 1, endLine).join('\n')
+    : file_contents[endLine - 1]
+
+  const previousCommentMsgs = commentThread.map((comment, i) => ({
+    role: i % 2 === 0 ? 'user' : 'assistant',
+    content: comment.body
+  }))
+  console.log('beforeCode', beforeCode)
+
+  const promptMessages = [
     {
       role: 'system',
       content:
@@ -157,16 +172,14 @@ export async function createCommentIfFromCopilotDefender(
     },
     {
       role: 'user',
-      content: `How can I improve this code?\n\n\`\`\`\n${beforeCode}\n\`\`\``
-    },
-    {
-      role: 'assistant',
-      content: fixAndExplanation
-    },
-    {role: 'user', content: userQuery}
-  ]
+      content: `Given the context of the files above, how can I improve this block of code?\n\n\`\`\`\n${beforeCode}\n\`\`\``
+    }
+  ].concat(previousCommentMsgs)
 
-  const body = await getChatGPTResponse(prompt)
+  console.log('PROMPT MESSAGES')
+  console.log(promptMessages)
+
+  const body = await getChatGPTResponse(promptMessages)
   console.log('CHATGPT RESPONSE')
   console.log(body)
   await octokit.rest.pulls.createReplyForReviewComment({
