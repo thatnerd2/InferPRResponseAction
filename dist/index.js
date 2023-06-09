@@ -61,6 +61,7 @@ function getCopilotDefenderCommentThread(comments, commentId) {
         }
         const commentThread = [];
         let lastComment = commentMap[commentId];
+        // TODO what if lastcomment isn't really the last comment? we'd need to check
         while (lastComment) {
             commentThread.push(lastComment);
             if (!lastComment.in_reply_to_id)
@@ -136,12 +137,12 @@ function createCommentIfFromCopilotDefender(commentId) {
         const body = yield getChatGPTResponse(prompt);
         console.log('CHATGPT RESPONSE');
         console.log(body);
-        yield octokit.rest.issues.createComment({
+        yield octokit.rest.pulls.createReplyForReviewComment({
             owner,
             repo,
             body,
-            issue_number: pullNumber,
-            in_reply_to: commentId
+            pull_number: pullNumber,
+            comment_id: commentId
         });
         console.log('RETURN TRUE');
         return true;

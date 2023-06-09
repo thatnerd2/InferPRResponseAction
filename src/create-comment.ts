@@ -58,6 +58,7 @@ async function getCopilotDefenderCommentThread(
 
   const commentThread = []
   let lastComment = commentMap[commentId]
+  // TODO what if lastcomment isn't really the last comment? we'd need to check
   while (lastComment) {
     commentThread.push(lastComment)
     if (!lastComment.in_reply_to_id) break
